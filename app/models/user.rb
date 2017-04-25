@@ -37,10 +37,6 @@ class User < ActiveRecord::Base
     update_attribute(:remember_digest, User.digest(remember_token))
   end
 
-  #def authenticated?(remember_token)
-  #  BCrypt::Password.new(remember_digest).is_password?(remember_token)
-  #end
-
   # トークンがダイジェストと一致したらtrueを返す
   def authenticated?(attribute, token)
     digest = send("#{attribute}_digest")
@@ -52,16 +48,8 @@ class User < ActiveRecord::Base
     update_attribute(:remember_digest, nil)
   end
 
-  # 渡されたトークンがダイジェストと一致したらtrueを返す
-  #def authenticated?(remember_token)
-  #  return false if remember_digest.nil?
-  #  BCrypt::Password.new(remember_digest).is_password?(remember_token)
-  #end
-
   # アカウントを有効にする
   def activate
-    # update_attribute(:activated,    true)
-    # update_attribute(:activated_at, Time.zone.now)
     update_columns(activated: true, activated_at: Time.zone.now)
   end
 
@@ -73,8 +61,6 @@ class User < ActiveRecord::Base
   # パスワード再設定の属性を設定する
   def create_reset_digest
     self.reset_token = User.new_token
-    # update_attribute(:reset_digest,  User.digest(reset_token))
-    # update_attribute(:reset_sent_at, Time.zone.now)
     update_columns(reset_digest: User.digest(reset_token),
                    reset_sent_at: Time.zone.now)
   end
@@ -91,10 +77,6 @@ class User < ActiveRecord::Base
 
  # 完全な実装は第12章「ユーザーをフォローする」を参照してください。
   def feed
-    #Micropost.where("user_id = ?", id)
-    #Micropost.where("user_id IN (?) OR user_id = ?", following_ids, id)
-    #Micropost.where("user_id IN (:following_ids) OR user_id = :user_id",
-    #                following_ids: following_ids, user_id: id)
     following_ids = "SELECT followed_id FROM relationships
                      WHERE  follower_id = :user_id"
     Micropost.where("user_id IN (#{following_ids})
